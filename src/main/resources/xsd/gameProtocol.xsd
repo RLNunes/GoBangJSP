@@ -1,0 +1,26 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:include schemaLocation="auth.xsd"/>
+    <xs:include schemaLocation="game.xsd"/>
+    <xs:include schemaLocation="player.xsd"/>
+    <xs:include schemaLocation="updateProfileRequest.xsd"/>
+    <xs:include schemaLocation="findMatch.xsd"/>
+    <xs:include schemaLocation="cancelMatch.xsd"/>
+    <xs:include schemaLocation="gameEnd.xsd"/>
+
+    <xs:element name="message">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element ref="loginRequest"/>
+                <xs:element ref="registerRequest"/>
+                <xs:element ref="response"/>
+                <xs:element ref="move"/>
+                <xs:element ref="gameStart"/>
+                <xs:element ref="player"/>
+                <xs:element ref="updateProfileRequest"/>
+                <xs:element ref="findMatch"/>
+                <xs:element ref="cancelMatch"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
