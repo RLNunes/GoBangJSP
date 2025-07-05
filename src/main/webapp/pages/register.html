@@ -14,7 +14,7 @@
   <h2 class="title is-4 has-text-weight-bold mb-5">
     Register New Player
   </h2>
-  <form action="/register" method="post" enctype="multipart/form-data">
+  <form action="/GoBangJSP_Web_exploded/register" method="post" id="registerForm">
     <div class="field mb-3">
       <label class="label has-text-left" for="nickname">Nickname</label>
         <input
@@ -90,11 +90,12 @@
           value="#ffffff"
         />
     </div>
-    <button type="submit" class="btn btn-primary">Register</button>
+    <button type="submit" class="btn btn-primary" id="registerBtn" disabled>Register</button>
   </form>
   <a href="../index.html" class="button is-link is-light mt-4 is-fullwidth">
     ← Back Home
   </a>
 </div>
+<script src="../js/register.js"></script>
 </body>
 </html>

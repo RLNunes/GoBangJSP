@@ -48,31 +48,37 @@ public class RegisterServlet extends HttpServlet {
         }
 
         String registerXml = XmlMessageBuilder.buildRegisterRequest(nickname, password, age, nationality, photoBase64);
-        String xsdPath = "src/main/resources/xsd/player.xsd";
+        String xsdPath = request.getServletContext().getRealPath("WEB-INF/classes/org/rafael/gobangjsp/common/xsd/gameProtocol.xsd");
         if (!XmlMessageReader.validateXml(registerXml, xsdPath)) {
             showError(out, "XML de registo inválido (não cumpre o XSD).");
             return;
         }
 
+        System.out.println("[RegisterServlet] Enviar XML de registo para o servidor: " + registerXml);
         GameServerClient client = new GameServerClient();
         String serverResponseXml;
         try {
             serverResponseXml = client.sendCommand(registerXml);
+            System.out.println("[RegisterServlet] Resposta XML do servidor: " + serverResponseXml);
         } catch (Exception e) {
+            System.err.println("[RegisterServlet] Erro na comunicação com o servidor: " + e.getMessage());
             showError(out, "Falha na comunicação com o servidor de jogos.");
             return;
         }
 
         if (!ServerResponseHandler.validate(serverResponseXml, xsdPath)) {
+            System.err.println("[RegisterServlet] XML de resposta inválido (não cumpre o XSD).");
             showError(out, "Resposta do servidor inválida (XML não cumpre o XSD).");
             return;
         }
 
         if (ServerResponseHandler.isSuccess(serverResponseXml, "register")) {
+            System.out.println("[RegisterServlet] Registo efetuado com sucesso para utilizador: " + nickname);
             // Save backgroundColor locally if needed
             showSuccess(out);
         } else {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "register");
+            System.err.println("[RegisterServlet] Erro no registo: " + (reason != null ? reason : "Desconhecido"));
             showError(out, "Erro no registo: " + (reason != null ? reason : "Desconhecido"));
         }
     }
@@ -100,7 +106,7 @@ public class RegisterServlet extends HttpServlet {
     private void showSuccess(PrintWriter out) {
         out.println("<html><body>");
         out.println("<h2>Registo efetuado com sucesso!</h2>");
-        out.println("<a href='login.html'>Ir para Login</a>");
+        out.println("<a href='pages/login.html'>Ir para Login</a>");
         out.println("</body></html>");
     }
 }
