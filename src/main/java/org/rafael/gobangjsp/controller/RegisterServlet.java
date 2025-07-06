@@ -34,14 +34,14 @@ public class RegisterServlet extends HttpServlet {
         // Validação dos campos obrigatórios
         if (!RegisterFormValidator.validateRequiredFields(nickname, password, nationality, ageStr)) {
             request.getSession().setAttribute("errorMsg", "Todos os campos são obrigatórios.");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
         // Validação da força da password
         if (!RegisterFormValidator.validatePasswordStrength(password)) {
             request.getSession().setAttribute("errorMsg", "A password deve ter pelo menos 6 caracteres, incluindo letras e números.");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
@@ -49,7 +49,7 @@ public class RegisterServlet extends HttpServlet {
         Integer age = RegisterFormValidator.parseValidAge(ageStr);
         if (age == null) {
             request.getSession().setAttribute("errorMsg", "Idade inválida (deve ser um número entre 6 e 120).");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
@@ -61,7 +61,7 @@ public class RegisterServlet extends HttpServlet {
 
         if (!ServerResponseHandler.validate(registerXml, xsdPath)) {
             request.getSession().setAttribute("errorMsg", "XML de registo inválido (não cumpre o XSD).");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
@@ -74,14 +74,14 @@ public class RegisterServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("[RegisterServlet] Erro na comunicação com o servidor: " + e.getMessage());
             request.getSession().setAttribute("errorMsg", "Falha na comunicação com o servidor de jogos.");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
         if (!ServerResponseHandler.validate(serverResponseXml, xsdPath)) {
             System.err.println("[RegisterServlet] XML de resposta inválido (não cumpre o XSD).");
             request.getSession().setAttribute("errorMsg", "Resposta do servidor inválida (XML não cumpre o XSD).");
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
@@ -95,7 +95,7 @@ public class RegisterServlet extends HttpServlet {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "register");
             System.err.println("[RegisterServlet] Erro no registo: " + (reason != null ? reason : "Desconhecido"));
             request.getSession().setAttribute("errorMsg", "Erro no registo: " + (reason != null ? reason : "Desconhecido"));
-            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
+            request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
         }
     }
 

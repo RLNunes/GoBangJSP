@@ -5,7 +5,10 @@
   <meta charset="UTF-8" />
   <title>Register</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
-  <link rel="stylesheet" href="../css/style.css" />
+  <%
+    String ctx = request.getContextPath();
+  %>
+  <link rel="stylesheet" href="<%= ctx %>/css/style.css" />
 </head>
 <body>
 <div class="custom-box">
