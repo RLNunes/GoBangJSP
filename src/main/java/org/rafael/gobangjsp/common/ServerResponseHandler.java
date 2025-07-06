@@ -2,8 +2,16 @@ package org.rafael.gobangjsp.common;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.StringReader;
 
 /**
  * Classe utilitária para validação e parsing de respostas XML do servidor de jogo.
@@ -19,7 +27,16 @@ public class ServerResponseHandler {
      * @return true se válido, false caso contrário
      */
     public static boolean validate(String xml, String xsdPath) {
-        return XmlMessageReader.validateXml(xml, xsdPath);
+        try {
+            SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+            Schema schema = factory.newSchema(new File(xsdPath));
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(new StringReader(xml)));
+            return true;
+        } catch (Exception e) {
+            System.err.println("Erro de validação XML: " + e.getMessage());
+            return false;
+        }
     }
 
     /**

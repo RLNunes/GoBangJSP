@@ -62,17 +62,5 @@ public class XmlMessageReader {
         return Boolean.parseBoolean(value);
     }
 
-    // Valida um XML recebido contra um XSD
-    public static boolean validateXml(String xml, String xsdPath) {
-        try {
-            SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-            Schema schema = factory.newSchema(new File(xsdPath));
-            Validator validator = schema.newValidator();
-            validator.validate(new StreamSource(new StringReader(xml)));
-            return true;
-        } catch (Exception e) {
-            System.err.println("Erro de validação XML: " + e.getMessage());
-            return false;
-        }
-    }
+
 }

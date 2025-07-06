@@ -20,7 +20,7 @@ public class GameServerClient {
 
     // Configuração centralizada (pode ser adaptada para ler de ficheiro ou env)
     private static final String DEFAULT_SERVER_IP = "127.0.0.1";
-    private static final int DEFAULT_SERVER_PORT = 12345;
+    private static final int DEFAULT_SERVER_PORT = 8082;
 
     /**
      * Construtor sem argumentos: usa IP e porto predefinidos.
@@ -46,12 +46,18 @@ public class GameServerClient {
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
             out.println(command);
 
-            StringBuilder response = new StringBuilder();
+            /*StringBuilder response = new StringBuilder();
             String line;
+            // Lê até encontrar o fecho do XML </response> para evitar bloqueio
             while ((line = in.readLine()) != null) {
                 response.append(line).append("\n");
+                if (line.contains("</response>")) {
+                    break;
+                }
             }
-            return response.toString().trim();
+            return response.toString().trim();*/
+
+            return in.readLine();
         }
     }
 }
