@@ -1,25 +1,26 @@
 package org.rafael.gobangjsp.controller;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
 import java.util.Base64;
 import org.rafael.gobangjsp.common.*;
 import org.rafael.gobangjsp.util.GameServerClient;
 import org.rafael.gobangjsp.validation.RegisterFormValidator;
 
 @WebServlet(name = "registerServlet", value = "/register")
+@MultipartConfig
 public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
+        // Não definir contentType aqui, pois o forward trata disso
 
         String nickname = request.getParameter("nickname");
         String password = request.getParameter("password");
@@ -28,29 +29,39 @@ public class RegisterServlet extends HttpServlet {
         String backgroundColor = request.getParameter("backgroundColor");
         String photoBase64 = getPhotoBase64(request);
 
+
+
         // Validação dos campos obrigatórios
         if (!RegisterFormValidator.validateRequiredFields(nickname, password, nationality, ageStr)) {
-            showError(out, "Todos os campos são obrigatórios.");
+            request.getSession().setAttribute("errorMsg", "Todos os campos são obrigatórios.");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
-        // Validação da força da password (opcional, mas recomendada)
+        // Validação da força da password
         if (!RegisterFormValidator.validatePasswordStrength(password)) {
-            showError(out, "A password deve ter pelo menos 6 caracteres, incluindo letras e números.");
+            request.getSession().setAttribute("errorMsg", "A password deve ter pelo menos 6 caracteres, incluindo letras e números.");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
         // Validação e parsing da idade
         Integer age = RegisterFormValidator.parseValidAge(ageStr);
         if (age == null) {
-            showError(out, "Idade inválida (deve ser um número entre 6 e 120).");
+            request.getSession().setAttribute("errorMsg", "Idade inválida (deve ser um número entre 6 e 120).");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
         String registerXml = XmlMessageBuilder.buildRegisterRequest(nickname, password, age, nationality, photoBase64);
-        String xsdPath = request.getServletContext().getRealPath("WEB-INF/classes/org/rafael/gobangjsp/common/xsd/gameProtocol.xsd");
-        if (!XmlMessageReader.validateXml(registerXml, xsdPath)) {
-            showError(out, "XML de registo inválido (não cumpre o XSD).");
+
+        //String xsdPath = request.getServletContext().getRealPath("/xsd/gameProtocol.xsd");
+
+        String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
+
+        if (!ServerResponseHandler.validate(registerXml, xsdPath)) {
+            request.getSession().setAttribute("errorMsg", "XML de registo inválido (não cumpre o XSD).");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
@@ -62,24 +73,29 @@ public class RegisterServlet extends HttpServlet {
             System.out.println("[RegisterServlet] Resposta XML do servidor: " + serverResponseXml);
         } catch (Exception e) {
             System.err.println("[RegisterServlet] Erro na comunicação com o servidor: " + e.getMessage());
-            showError(out, "Falha na comunicação com o servidor de jogos.");
+            request.getSession().setAttribute("errorMsg", "Falha na comunicação com o servidor de jogos.");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
         if (!ServerResponseHandler.validate(serverResponseXml, xsdPath)) {
             System.err.println("[RegisterServlet] XML de resposta inválido (não cumpre o XSD).");
-            showError(out, "Resposta do servidor inválida (XML não cumpre o XSD).");
+            request.getSession().setAttribute("errorMsg", "Resposta do servidor inválida (XML não cumpre o XSD).");
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
             return;
         }
 
         if (ServerResponseHandler.isSuccess(serverResponseXml, "register")) {
             System.out.println("[RegisterServlet] Registo efetuado com sucesso para utilizador: " + nickname);
-            // Save backgroundColor locally if needed
-            showSuccess(out);
+            request.getSession().setAttribute("nickname", nickname);
+
+            response.sendRedirect(request.getContextPath() + "/pages/dashboard.jsp");
+
         } else {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "register");
             System.err.println("[RegisterServlet] Erro no registo: " + (reason != null ? reason : "Desconhecido"));
-            showError(out, "Erro no registo: " + (reason != null ? reason : "Desconhecido"));
+            request.getSession().setAttribute("errorMsg", "Erro no registo: " + (reason != null ? reason : "Desconhecido"));
+            response.sendRedirect(request.getContextPath() + "/pages/register.jsp");
         }
     }
 
@@ -94,19 +110,5 @@ public class RegisterServlet extends HttpServlet {
             // Ignore if no photo
         }
         return "";
-    }
-
-    private void showError(PrintWriter out, String message) {
-        out.println("<html><body>");
-        out.println("<h2>Erro: " + message + "</h2>");
-        out.println("<a href='pages/register.html'>Voltar</a>");
-        out.println("</body></html>");
-    }
-
-    private void showSuccess(PrintWriter out) {
-        out.println("<html><body>");
-        out.println("<h2>Registo efetuado com sucesso!</h2>");
-        out.println("<a href='pages/login.html'>Ir para Login</a>");
-        out.println("</body></html>");
     }
 }

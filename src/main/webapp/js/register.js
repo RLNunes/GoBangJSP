@@ -29,37 +29,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Verificação inicial
     btn.disabled = !areRequiredFieldsFilled();
-
-   /* form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        btn.disabled = true;
-        errorDiv.textContent = '';
-        const formData = new FormData(form);
-        fetch(form.action, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-                return null;
-            }
-            return response.text();
-        })
-        .then(text => {
-            if (text) {
-                // Tenta extrair mensagem de erro do HTML devolvido pelo servlet
-                console.log(text)
-                const match = text.match(/<h2>Erro: (.*?)<\/h2>/i);
-                errorDiv.textContent = match ? match[1] : 'Erro no registo.';
-            }
-        })
-        .catch(() => {
-            errorDiv.textContent = 'Erro de comunicação com o servidor.';
-        })
-        .finally(() => {
-            btn.disabled = false;
-        });
-    });*/
 });
-

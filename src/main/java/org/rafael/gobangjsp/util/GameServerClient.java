@@ -20,7 +20,7 @@ public class GameServerClient {
 
     // Configuração centralizada (pode ser adaptada para ler de ficheiro ou env)
     private static final String DEFAULT_SERVER_IP = "127.0.0.1";
-    private static final int DEFAULT_SERVER_PORT = 8081;
+    private static final int DEFAULT_SERVER_PORT = 8082;
 
     /**
      * Construtor sem argumentos: usa IP e porto predefinidos.
