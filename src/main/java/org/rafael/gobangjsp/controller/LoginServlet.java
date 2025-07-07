@@ -31,12 +31,12 @@ public class LoginServlet extends HttpServlet {
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
 
         if (!ServerResponseHandler.validate(loginXml, xsdPath)) {
-            request.getSession().setAttribute("errorMsg", "XML de registo inválido (não cumpre o XSD).");
+            request.getSession().setAttribute("errorMsg", "XML de login inválido (não cumpre o XSD).");
             request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
             return;
         }
 
-        System.out.println("[LoginServlet] Enviar XML de registo para o servidor: " + loginXml);
+        System.out.println("[LoginServlet] Enviar XML de login para o servidor: " + loginXml);
         GameServerClient client = new GameServerClient();
         String serverResponseXml;
         try {
@@ -64,7 +64,7 @@ public class LoginServlet extends HttpServlet {
 
         } else {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "login");
-            System.err.println("[LoginServlet] Erro no registo: " + (reason != null ? reason : "Desconhecido"));
+            System.err.println("[LoginServlet] Erro no login: " + (reason != null ? reason : "Desconhecido"));
             request.getSession().setAttribute("errorMsg", "Erro no login: " + (reason != null ? reason : "Desconhecido"));
             request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
         }
