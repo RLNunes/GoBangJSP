@@ -14,7 +14,7 @@
 <section class="custom-box">
   <h1 class="title is-1">GoBang Game!</h1>
   <nav>
-    <a href="pages/login.html" class="btn btn-primary btn-red">Login</a>
+    <a href="pages/login.jsp" class="btn btn-primary btn-red">Login</a>
     <a href="pages/register.jsp" class="btn btn-primary ">Register</a>
     <a href="pages/ranking.html" class="btn btn-primary btn-green">Hall of Fame</a>
   </nav>
