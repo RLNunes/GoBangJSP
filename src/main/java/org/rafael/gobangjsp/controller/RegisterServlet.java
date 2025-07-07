@@ -8,11 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Base64;
 import org.rafael.gobangjsp.common.*;
 import org.rafael.gobangjsp.util.GameServerClient;
-import org.rafael.gobangjsp.validation.RegisterFormValidator;
+import org.rafael.gobangjsp.validation.FormValidator;
 
 @WebServlet(name = "registerServlet", value = "/register")
 @MultipartConfig
@@ -32,21 +31,21 @@ public class RegisterServlet extends HttpServlet {
 
 
         // Validação dos campos obrigatórios
-        if (!RegisterFormValidator.validateRequiredFields(nickname, password, nationality, ageStr)) {
+        if (!FormValidator.validateRequiredFields(nickname, password, nationality, Integer.parseInt(ageStr), photoBase64)) {
             request.getSession().setAttribute("errorMsg", "Todos os campos são obrigatórios.");
             request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
         // Validação da força da password
-        if (!RegisterFormValidator.validatePasswordStrength(password)) {
+        if (!FormValidator.validatePasswordStrength(password)) {
             request.getSession().setAttribute("errorMsg", "A password deve ter pelo menos 6 caracteres, incluindo letras e números.");
             request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
         }
 
         // Validação e parsing da idade
-        Integer age = RegisterFormValidator.parseValidAge(ageStr);
+        Integer age = FormValidator.parseValidAge(Integer.parseInt(ageStr));
         if (age == null) {
             request.getSession().setAttribute("errorMsg", "Idade inválida (deve ser um número entre 6 e 120).");
             request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
@@ -54,8 +53,6 @@ public class RegisterServlet extends HttpServlet {
         }
 
         String registerXml = XmlMessageBuilder.buildRegisterRequest(nickname, password, age, nationality, photoBase64);
-
-        //String xsdPath = request.getServletContext().getRealPath("/xsd/gameProtocol.xsd");
 
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
 
