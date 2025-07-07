@@ -31,7 +31,7 @@ public class RegisterServlet extends HttpServlet {
 
 
         // Validação dos campos obrigatórios
-        if (!FormValidator.validateRequiredFields(nickname, password, nationality, Integer.getInteger(ageStr), photoBase64)) {
+        if (!FormValidator.validateRequiredFields(nickname, password, nationality, Integer.parseInt(ageStr), photoBase64)) {
             request.getSession().setAttribute("errorMsg", "Todos os campos são obrigatórios.");
             request.getServletContext().getRequestDispatcher("/pages/register.jsp").forward(request, response);
             return;
