@@ -26,14 +26,14 @@
   <% } %>
   <form action="${pageContext.request.contextPath}/register" method="post" id="registerForm">
     <div class="field mb-3">
-      <label class="label has-text-left" for="nickname">Nickname</label>
+      <label class="label has-text-left" for="username">Username</label>
         <input
           class="input"
           type="text"
-          id="nickname"
-          name="nickname"
-          placeholder="Enter your nickname"
-          value="${param.nickname}"
+          id="username"
+          name="username"
+          placeholder="Enter your username"
+          value="${param.username}"
           required
         />
     </div>

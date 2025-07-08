@@ -20,9 +20,9 @@
             UserProfileData profile = (UserProfileData) session.getAttribute("userProfile");
         %>
         <div class="field">
-            <label class="label has-text-left" for="nickname">Nickname</label>
+            <label class="label has-text-left" for="username">Username</label>
             <div class="control">
-                <input class="input" type="text" id="nickname" name="nickname"
+                <input class="input" type="text" id="username" name="username"
                        value="<%= profile != null ? profile.username() : "" %>"
                        required/>
             </div>

@@ -22,18 +22,18 @@ public class EditProfileServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String nickname = request.getParameter("nickname");
+        String username = request.getParameter("username");
         String password = request.getParameter("password");
         String nationality = request.getParameter("nationality");
         String ageStr = request.getParameter("age");
         String bgcolor = request.getParameter("bgcolor");
         String photoBase64 = getPhotoBase64(request);
 
-        System.out.println("[EditProfileServlet] Pedido de edicao de perfil para: " + nickname);
+        System.out.println("[EditProfileServlet] Pedido de edicao de perfil para: " + username);
 
-        if (!FormValidator.validateRequiredFields(nickname)) {
-            System.out.println("[EditProfileServlet] Falha: nickname em falta.");
-            forwardWithError(request, response, "O nickname é obrigatório.");
+        if (!FormValidator.validateRequiredFields(username)) {
+            System.out.println("[EditProfileServlet] Falha: username em falta.");
+            forwardWithError(request, response, "O username é obrigatório.");
             return;
         }
         Integer age = null;
@@ -52,7 +52,7 @@ public class EditProfileServlet extends HttpServlet {
             }
         }
 
-        String xmlRequest = XmlMessageBuilder.buildUpdateProfileRequest(nickname, photoBase64);
+        String xmlRequest = XmlMessageBuilder.buildUpdateProfileRequest(username, photoBase64);
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
         if (!ServerResponseHandler.validate(xmlRequest, xsdPath)) {
             System.out.println("[EditProfileServlet] Falha: XML de pedido invalido.");
@@ -78,9 +78,9 @@ public class EditProfileServlet extends HttpServlet {
         }
 
         if (ServerResponseHandler.isSuccess(xmlResponse, "updateProfile")) {
-            System.out.println("[EditProfileServlet] Perfil atualizado com sucesso para utilizador: " + nickname);
+            System.out.println("[EditProfileServlet] Perfil atualizado com sucesso para utilizador: " + username);
             UserDatabase db = new UserDatabase();
-            db.setBackgroundColor(nickname, bgcolor);
+            db.setBackgroundColor(username, bgcolor);
 
             UserProfileData profile = ServerResponseHandler.extractUserProfile(xmlResponse, xsdPath);
             request.getSession().setAttribute("userProfile", profile);
