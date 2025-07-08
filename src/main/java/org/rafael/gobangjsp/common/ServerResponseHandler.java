@@ -13,6 +13,8 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.io.StringReader;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe utilitária para validação e parsing de respostas XML do servidor de jogo.
@@ -132,6 +134,58 @@ public class ServerResponseHandler {
             System.err.println("[ServerResponseHandler] Erro ao extrair UserProfileData: " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Extrai dados de ranking do XML de resposta do servidor.
+     * Valida o XML com o XSD antes de extrair os dados.
+     * @param xml XML de resposta
+     * @param xsdPath Caminho para o XSD de validação
+     * @return Lista de objetos UserProfileData com os dados de ranking, ou null em caso de erro
+     */
+    public static List<UserProfileData> extractRanking(String xml, String xsdPath) {
+        List<UserProfileData> ranking = new ArrayList<>();
+        try {
+            // Validar o XML recebido com o XSD (response.xsd)
+            if (!validate(xml, xsdPath)) {
+                System.err.println("[ServerResponseHandler] XML de ranking inválido.");
+                return ranking;
+            }
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+            Element root = doc.getDocumentElement();
+            org.w3c.dom.NodeList responses = root.getElementsByTagName("response");
+            for (int i = 0; i < responses.getLength(); i++) {
+                Element resp = (Element) responses.item(i);
+                String username = getTagValue(resp, "username");
+                String nationality = getTagValue(resp, "nationality");
+                String ageStr = getTagValue(resp, "age");
+                String winsStr = getTagValue(resp, "wins");
+                String lossesStr = getTagValue(resp, "losses");
+                String timePlayedStr = getTagValue(resp, "timePlayed");
+                String photoBase64 = getTagValue(resp, "photo");
+                int age = ageStr != null && !ageStr.isEmpty() ? Integer.parseInt(ageStr) : 0;
+                int wins = winsStr != null && !winsStr.isEmpty() ? Integer.parseInt(winsStr) : 0;
+                int losses = lossesStr != null && !lossesStr.isEmpty() ? Integer.parseInt(lossesStr) : 0;
+                long timePlayed = timePlayedStr != null && !timePlayedStr.isEmpty() ? Long.parseLong(timePlayedStr) : 0L;
+                ranking.add(new UserProfileData(
+                    username,
+                    age,
+                    nationality,
+                    wins,
+                    losses,
+                    timePlayed,
+                    photoBase64
+                ));
+            }
+            // Ordenar por número de vitórias (decrescente)
+            ranking.sort((a, b) -> Integer.compare(b.wins(), a.wins()));
+        } catch (Exception e) {
+            System.err.println("[ServerResponseHandler] Erro ao extrair ranking: " + e.getMessage());
+        }
+        return ranking;
     }
 
     // Método utilitário para obter o valor de um elemento filho por nome

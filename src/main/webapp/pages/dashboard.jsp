@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-         pageEncoding="ISO-8859-1" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,10 +21,9 @@
         <% } %>
     </h1>
     <a href="game.html" class="btn btn-primary">Play</a>
-    <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary">Profile</a>
-    <a href="ranking.html" class="btn btn-primary">Hall of Fame</a>
-    <a href="${pageContext.request.contextPath}/logout" class="btn btn-red">Logout</a>
-    <a href="index.jsp" class="btn btn-green">← Back Home</a>
+    <a href="<%= ctx %>/profile" class="btn btn-primary">Profile</a>
+    <a href="<%= ctx %>/ranking" class="btn btn-primary">Hall of Fame</a>
+    <a href="<%= ctx %>/logout" class="btn btn-red">Logout</a>
 </div>
 </body>
 </html>

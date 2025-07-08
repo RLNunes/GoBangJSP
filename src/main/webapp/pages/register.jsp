@@ -24,7 +24,7 @@
     <div style="color:green; margin-bottom:1em;"><%= session.getAttribute("success") %></div>
     <% session.removeAttribute("success"); %>
   <% } %>
-  <form action="${pageContext.request.contextPath}/register" method="post" id="registerForm">
+  <form action="<%= ctx %>/register" method="post" id="registerForm">
     <div class="field mb-3">
       <label class="label has-text-left" for="username">Username</label>
         <input
