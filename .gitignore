@@ -44,3 +44,5 @@ test-output/
 
 # Ficheiros de saída de compilação
 out/
+
+data/
