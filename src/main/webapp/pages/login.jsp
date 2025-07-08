@@ -23,10 +23,10 @@
     <% } %>
     <form action="${pageContext.request.contextPath}/login" method="post">
         <div class="field">
-            <label class="label has-text-left" for="nickname">Nickname</label>
+            <label class="label has-text-left" for="username">Username</label>
             <div class="control">
-                <input class="input" type="text" id="nickname" name="nickname" placeholder="Enter your nickname"
-                       value="${param.nickname}"
+                <input class="input" type="text" id="username" name="username" placeholder="Enter your username"
+                       value="${param.username}"
                        required/>
             </div>
         </div>

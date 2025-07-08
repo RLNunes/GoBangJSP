@@ -18,18 +18,18 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String nickname = request.getParameter("nickname");
+        String username = request.getParameter("username");
         String password = request.getParameter("password");
-        System.out.println("[LoginServlet] Tentativa de login para: " + nickname);
+        System.out.println("[LoginServlet] Tentativa de login para: " + username);
 
         // Validação dos campos obrigatórios
-        if (!FormValidator.validateRequiredFields(nickname, password)) {
+        if (!FormValidator.validateRequiredFields(username, password)) {
             System.out.println("[LoginServlet] Falha: campos obrigatórios em falta.");
             forwardWithError(request, response, "Todos os campos são obrigatórios.");
             return;
         }
 
-        String loginXml = XmlMessageBuilder.buildLoginRequest(nickname, password);
+        String loginXml = XmlMessageBuilder.buildLoginRequest(username, password);
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
 
         if (!ServerResponseHandler.validate(loginXml, xsdPath)) {
@@ -56,11 +56,11 @@ public class LoginServlet extends HttpServlet {
         }
 
         if (ServerResponseHandler.isSuccess(serverResponseXml, "login")) {
-            System.out.println("[LoginServlet] Login efetuado com sucesso para utilizador: " + nickname);
+            System.out.println("[LoginServlet] Login efetuado com sucesso para utilizador: " + username);
             // Extrair dados reais do utilizador do XML de resposta do servidor
             UserProfileData profile = ServerResponseHandler.extractUserProfile(serverResponseXml, xsdPath);
             request.getSession().setAttribute("userProfile", profile);
-            request.getSession().setAttribute("nickname", nickname);
+            request.getSession().setAttribute("username", username);
             response.sendRedirect(request.getContextPath() + "/pages/dashboard.jsp");
         } else {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "login");

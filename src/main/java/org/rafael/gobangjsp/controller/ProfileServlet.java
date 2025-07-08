@@ -16,13 +16,13 @@ import java.io.IOException;
 public class ProfileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String nickname = (String) request.getSession().getAttribute("nickname");
-        if (nickname == null) {
+        String username = (String) request.getSession().getAttribute("username");
+        if (username == null) {
             response.sendRedirect(request.getContextPath() + "/pages/login.jsp");
             return;
         }
 
-        String xmlRequest = XmlMessageBuilder.buildRequestProfile(nickname);
+        String xmlRequest = XmlMessageBuilder.buildRequestProfile(username);
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
         GameServerClient client = new GameServerClient();
         String xmlResponse;
@@ -40,9 +40,13 @@ public class ProfileServlet extends HttpServlet {
         }
         UserProfileData profile = ServerResponseHandler.extractUserProfile(xmlResponse, xsdPath);
         request.getSession().setAttribute("userProfile", profile);
-        System.out.println("[ProfileServlet] Perfil carregado com sucesso para utilizador: " + nickname);
+        System.out.println("[ProfileServlet] Perfil carregado com sucesso para utilizador: " + username);
         System.out.println("[ProfileServlet] Dados do perfil: " + profile);
         request.getRequestDispatcher("/pages/profile.jsp").forward(request, response);
     }
-}
 
+    private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String errorMsg) throws ServletException, IOException {
+        request.getSession().setAttribute("error", errorMsg);
+        request.getServletContext().getRequestDispatcher("/pages/dashboard.jsp").forward(request, response);
+    }
+}

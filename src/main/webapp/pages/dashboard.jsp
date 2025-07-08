@@ -15,8 +15,8 @@
 <body>
 <div class="custom-box">
     <h1 class="title">
-        <% if (session.getAttribute("nickname") != null) { %>
-        Welcome, <%= session.getAttribute("nickname") %>!
+        <% if (session.getAttribute("username") != null) { %>
+        Welcome, <%= session.getAttribute("username") %>!
         <% } else { %>
         Welcome, Player!
         <% } %>
@@ -24,8 +24,8 @@
     <a href="game.html" class="btn btn-primary">Play</a>
     <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary">Profile</a>
     <a href="ranking.html" class="btn btn-primary">Hall of Fame</a>
-    <a href="login.html" class="btn btn-red">Logout</a>
-    <a href="../index.html" class="btn btn-green">← Back Home</a>
+    <a href="${pageContext.request.contextPath}/logout" class="btn btn-red">Logout</a>
+    <a href="index.jsp" class="btn btn-green">← Back Home</a>
 </div>
 </body>
 </html>
