@@ -1,8 +1,9 @@
 package org.rafael.gobangjsp.common;
 
+import java.util.List;
+
 public class XmlMessageBuilder {
 
-    
     private static String wrapWithMessage(String contentXml) {
         return "<message>" + contentXml + "</message>";
     }
@@ -34,6 +35,14 @@ public class XmlMessageBuilder {
         return wrapWithMessage(content);
     }
 
+    public static String buildRequestProfile(String username) {
+        String content = "<getProfileRequest>" +
+                "<username>" + username + "</username>" +
+                "</getProfileRequest>";
+        return wrapWithMessage(content);
+    }
+
+
     public static String buildResponse(String status, String message, String operation) {
         String content = "<response>" +
                 "<status>" + status + "</status>" +
@@ -43,20 +52,15 @@ public class XmlMessageBuilder {
         return wrapWithMessage(content);
     }
 
-    public static String buildAuthResponse(String status, String message, String operation, String username, String photoBase64, int age, String nationality, int wins, int losses, long timePlayed) {
-        String content = "<response>" +
-                "<status>" + status + "</status>" +
-                "<message>" + message + "</message>" +
-                "<operation>"+ operation +"</operation>" +
-                "<username>" + username + "</username>" +
-                "<photo>" + (photoBase64 != null ? photoBase64 : "") + "</photo>" +
-                "<age>" + age + "</age>" +
-                "<nationality>" + nationality + "</nationality>" +
-                "<wins>" + wins + "</wins>" +
-                "<losses>" + losses + "</losses>" +
-                "<timePlayed>" + timePlayed + "</timePlayed>" +
-                "</response>";
-        return wrapWithMessage(content);
+    private static String buildGamesHistoryXml(List<GameHistory> gamesHistory) {
+        StringBuilder xml = new StringBuilder("<gamesHistory>");
+        if (gamesHistory != null) {
+            for (GameHistory entry : gamesHistory) {
+                xml.append("<game>" + "<dateTime>").append(entry.dateTime()).append("</dateTime>").append("<duration>").append(entry.duration()).append("</duration>").append("<opponent>").append(entry.opponent()).append("</opponent>").append("<result>").append(entry.result()).append("</result>").append("</game>");
+            }
+        }
+        xml.append("</gamesHistory>");
+        return xml.toString();
     }
 
     public static String buildFindMatchRequest(String username) {
@@ -101,5 +105,36 @@ public class XmlMessageBuilder {
         content += "</gameEnd>";
         return wrapWithMessage(content);
     }
-}
 
+    public static String buildLogoutRequest(String username) {
+        String content = "<logoutRequest>" +
+                "<username>" + username + "</username>" +
+                "</logoutRequest>";
+        return wrapWithMessage(content);
+    }
+
+
+    public static String buildResponse(String status, String message, String operation, String username, String photoBase64, int age, String nationality, int wins, int losses, long timePlayed, List<GameHistory> gamesHistory) {
+        String content = "<response>"
+                + "<status>" + status + "</status>"
+                + "<message>" + message + "</message>"
+                + "<operation>" + operation + "</operation>"
+                + "<username>" + username + "</username>"
+                + "<photo>" + (photoBase64 != null ? photoBase64 : "") + "</photo>"
+                + "<age>" + age + "</age>"
+                + "<nationality>" + nationality + "</nationality>"
+                + "<wins>" + wins + "</wins>"
+                + "<losses>" + losses + "</losses>"
+                + "<timePlayed>" + timePlayed + "</timePlayed>"
+                + buildGamesHistoryXml(gamesHistory)
+                + "</response>";
+        return wrapWithMessage(content);
+    }
+
+    public static String buildQuitMatchRequest(String username) {
+        String content = "<quitMatch>" +
+                "<username>" + username + "</username>" +
+                "</quitMatch>";
+        return wrapWithMessage(content);
+    }
+}

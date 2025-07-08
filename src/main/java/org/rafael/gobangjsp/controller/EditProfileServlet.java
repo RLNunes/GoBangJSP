@@ -85,7 +85,8 @@ public class EditProfileServlet extends HttpServlet {
             UserProfileData profile = ServerResponseHandler.extractUserProfile(xmlResponse, xsdPath);
             request.getSession().setAttribute("userProfile", profile);
             request.getSession().setAttribute("success", "Perfil atualizado com sucesso!");
-            request.getServletContext().getRequestDispatcher("/pages/profile.jsp").forward(request, response);
+
+            response.sendRedirect(request.getContextPath() + "/pages/dashboard.jsp");
         } else {
             String errorMsg = ServerResponseHandler.getErrorMessage(xmlResponse, "updateProfile");
             System.err.println("[EditProfileServlet] Erro ao atualizar perfil: " + (errorMsg != null ? errorMsg : "Desconhecido"));

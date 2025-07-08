@@ -12,7 +12,6 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.StringReader;
-import org.rafael.gobangjsp.common.UserProfileData;
 import java.io.ByteArrayInputStream;
 
 /**
@@ -108,21 +107,14 @@ public class ServerResponseHandler {
             factory.setNamespaceAware(true);
             Document doc = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
             Element root = doc.getDocumentElement();
-            // Supondo que o XML tem um nó <user> ou <player> com os campos
-            Element userElem = null;
-            if (root.getElementsByTagName("user").getLength() > 0) {
-                userElem = (Element) root.getElementsByTagName("user").item(0);
-            } else if (root.getElementsByTagName("player").getLength() > 0) {
-                userElem = (Element) root.getElementsByTagName("player").item(0);
-            }
-            if (userElem == null) return null;
-            String username = userElem.getAttribute("nickname");
-            String nationality = userElem.getAttribute("nationality");
-            String ageStr = userElem.getAttribute("age");
-            String winsStr = userElem.getAttribute("wins");
-            String lossesStr = userElem.getAttribute("losses");
-            String timePlayedStr = userElem.getAttribute("timePlayed");
-            String photoBase64 = userElem.getAttribute("photoBase64");
+            // Extrair diretamente os campos do <response>
+            String username = getTagValue(root, "username");
+            String nationality = getTagValue(root, "nationality");
+            String ageStr = getTagValue(root, "age");
+            String winsStr = getTagValue(root, "wins");
+            String lossesStr = getTagValue(root, "losses");
+            String timePlayedStr = getTagValue(root, "timePlayed");
+            String photoBase64 = getTagValue(root, "photo");
             int age = ageStr != null && !ageStr.isEmpty() ? Integer.parseInt(ageStr) : 0;
             int wins = winsStr != null && !winsStr.isEmpty() ? Integer.parseInt(winsStr) : 0;
             int losses = lossesStr != null && !lossesStr.isEmpty() ? Integer.parseInt(lossesStr) : 0;
@@ -140,6 +132,14 @@ public class ServerResponseHandler {
             System.err.println("[ServerResponseHandler] Erro ao extrair UserProfileData: " + e.getMessage());
             return null;
         }
+    }
+
+    // Método utilitário para obter o valor de um elemento filho por nome
+    private static String getTagValue(Element parent, String tag) {
+        if (parent.getElementsByTagName(tag).getLength() > 0) {
+            return parent.getElementsByTagName(tag).item(0).getTextContent();
+        }
+        return null;
     }
 
     // Métodos utilitários adicionais podem ser facilmente adicionados aqui
