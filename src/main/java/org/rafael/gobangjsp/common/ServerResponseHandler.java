@@ -37,7 +37,7 @@ public class ServerResponseHandler {
             validator.validate(new StreamSource(new StringReader(xml)));
             return true;
         } catch (Exception e) {
-            System.err.println("Erro de validação XML: " + e.getMessage());
+            System.err.println("[ServerResponseHandler] Erro de validação XML: " + e.getMessage());
             return false;
         }
     }
@@ -59,7 +59,7 @@ public class ServerResponseHandler {
                 return response.getElementsByTagName(tag).item(0).getTextContent();
             }
         } catch (Exception e) {
-            // Ignorar, devolve null
+            System.err.println("[ServerResponseHandler] Erro ao extrair campo '" + tag + "': " + e.getMessage());
         }
         return null;
     }
@@ -100,36 +100,18 @@ public class ServerResponseHandler {
      */
     public static UserProfileData extractUserProfile(String xml, String xsdPath) {
         try {
-            // Validar o XML antes de processar
             if (!validate(xml, xsdPath)) {
                 System.err.println("[ServerResponseHandler] XML inválido para UserProfileData.");
                 return null;
             }
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            Document doc = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+            Document doc = parseXml(xml);
+            if (doc == null) return null;
             Element root = doc.getDocumentElement();
-            // Extrair diretamente os campos do <response>
-            String username = getTagValue(root, "username");
-            String nationality = getTagValue(root, "nationality");
-            String ageStr = getTagValue(root, "age");
-            String winsStr = getTagValue(root, "wins");
-            String lossesStr = getTagValue(root, "losses");
-            String timePlayedStr = getTagValue(root, "timePlayed");
-            String photoBase64 = getTagValue(root, "photo");
-            int age = ageStr != null && !ageStr.isEmpty() ? Integer.parseInt(ageStr) : 0;
-            int wins = winsStr != null && !winsStr.isEmpty() ? Integer.parseInt(winsStr) : 0;
-            int losses = lossesStr != null && !lossesStr.isEmpty() ? Integer.parseInt(lossesStr) : 0;
-            long timePlayed = timePlayedStr != null && !timePlayedStr.isEmpty() ? Long.parseLong(timePlayedStr) : 0L;
-            return new UserProfileData(
-                username != null ? username : "",
-                age,
-                nationality != null ? nationality : "",
-                wins,
-                losses,
-                timePlayed,
-                photoBase64 != null ? photoBase64 : ""
-            );
+
+            Element responseElem = root.getTagName().equals("response") ? root :
+                (Element) root.getElementsByTagName("response").item(0);
+            if (responseElem == null) return null;
+            return parseUserProfileFromElement(responseElem);
         } catch (Exception e) {
             System.err.println("[ServerResponseHandler] Erro ao extrair UserProfileData: " + e.getMessage());
             return null;
@@ -146,41 +128,18 @@ public class ServerResponseHandler {
     public static List<UserProfileData> extractRanking(String xml, String xsdPath) {
         List<UserProfileData> ranking = new ArrayList<>();
         try {
-            // Validar o XML recebido com o XSD (response.xsd)
             if (!validate(xml, xsdPath)) {
                 System.err.println("[ServerResponseHandler] XML de ranking inválido.");
                 return ranking;
             }
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+            Document doc = parseXml(xml);
+            if (doc == null) return ranking;
             Element root = doc.getDocumentElement();
             org.w3c.dom.NodeList responses = root.getElementsByTagName("response");
             for (int i = 0; i < responses.getLength(); i++) {
                 Element resp = (Element) responses.item(i);
-                String username = getTagValue(resp, "username");
-                String nationality = getTagValue(resp, "nationality");
-                String ageStr = getTagValue(resp, "age");
-                String winsStr = getTagValue(resp, "wins");
-                String lossesStr = getTagValue(resp, "losses");
-                String timePlayedStr = getTagValue(resp, "timePlayed");
-                String photoBase64 = getTagValue(resp, "photo");
-                int age = ageStr != null && !ageStr.isEmpty() ? Integer.parseInt(ageStr) : 0;
-                int wins = winsStr != null && !winsStr.isEmpty() ? Integer.parseInt(winsStr) : 0;
-                int losses = lossesStr != null && !lossesStr.isEmpty() ? Integer.parseInt(lossesStr) : 0;
-                long timePlayed = timePlayedStr != null && !timePlayedStr.isEmpty() ? Long.parseLong(timePlayedStr) : 0L;
-                ranking.add(new UserProfileData(
-                    username,
-                    age,
-                    nationality,
-                    wins,
-                    losses,
-                    timePlayed,
-                    photoBase64
-                ));
+                ranking.add(parseUserProfileFromElement(resp));
             }
-            // Ordenar por número de vitórias (decrescente)
             ranking.sort((a, b) -> Integer.compare(b.wins(), a.wins()));
         } catch (Exception e) {
             System.err.println("[ServerResponseHandler] Erro ao extrair ranking: " + e.getMessage());
@@ -188,13 +147,52 @@ public class ServerResponseHandler {
         return ranking;
     }
 
-    // Método utilitário para obter o valor de um elemento filho por nome
+    private static Document parseXml(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+        } catch (Exception e) {
+            System.err.println("[ServerResponseHandler] Erro ao fazer parse do XML: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static UserProfileData parseUserProfileFromElement(Element elem) {
+        String username = getTagValue(elem, "username");
+        String nationality = getTagValue(elem, "nationality");
+        String ageStr = getTagValue(elem, "age");
+        String winsStr = getTagValue(elem, "wins");
+        String lossesStr = getTagValue(elem, "losses");
+        String timePlayedStr = getTagValue(elem, "timePlayed");
+        String photoBase64 = getTagValue(elem, "photo");
+        int age = parseIntOrDefault(ageStr, 0);
+        int wins = parseIntOrDefault(winsStr, 0);
+        int losses = parseIntOrDefault(lossesStr, 0);
+        long timePlayed = parseLongOrDefault(timePlayedStr, 0L);
+        return new UserProfileData(
+            username != null ? username : "",
+            age,
+            nationality != null ? nationality : "",
+            wins,
+            losses,
+            timePlayed,
+            photoBase64 != null ? photoBase64 : ""
+        );
+    }
+
+    private static int parseIntOrDefault(String value, int def) {
+        try { return value != null && !value.isEmpty() ? Integer.parseInt(value) : def; } catch (Exception e) { return def; }
+    }
+    private static long parseLongOrDefault(String value, long def) {
+        try { return value != null && !value.isEmpty() ? Long.parseLong(value) : def; } catch (Exception e) { return def; }
+    }
+
     private static String getTagValue(Element parent, String tag) {
         if (parent.getElementsByTagName(tag).getLength() > 0) {
             return parent.getElementsByTagName(tag).item(0).getTextContent();
         }
         return null;
     }
-
-    // Métodos utilitários adicionais podem ser facilmente adicionados aqui
 }

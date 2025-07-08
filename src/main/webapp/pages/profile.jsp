@@ -63,6 +63,7 @@
         </div>
         <div class="field is-grouped is-grouped-right mt-4">
             <div class="control">
+                <a href="pages/dashboard.jsp" class="button is-link is-light">← Back to Dashboard</a>
                 <button class="button is-link" type="submit">Save Changes</button>
             </div>
         </div>
