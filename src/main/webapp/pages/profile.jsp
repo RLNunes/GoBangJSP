@@ -15,7 +15,7 @@
 <body>
 <section class="custom-box">
     <h1 class="title mb-4">Edit Profile</h1>
-    <form action="${pageContext.request.contextPath}/edit" method="post" enctype="multipart/form-data">
+    <form action="<%= ctx%>/edit" method="post" enctype="multipart/form-data">
         <%
             UserProfileData profile = (UserProfileData) session.getAttribute("userProfile");
         %>
