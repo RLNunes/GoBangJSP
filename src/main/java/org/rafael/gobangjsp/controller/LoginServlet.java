@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.rafael.gobangjsp.common.ServerResponseHandler;
+import org.rafael.gobangjsp.common.UserProfileData;
 import org.rafael.gobangjsp.common.XmlMessageBuilder;
 import org.rafael.gobangjsp.util.GameServerClient;
 import org.rafael.gobangjsp.validation.FormValidator;
@@ -19,11 +20,12 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String nickname = request.getParameter("nickname");
         String password = request.getParameter("password");
+        System.out.println("[LoginServlet] Tentativa de login para: " + nickname);
 
         // Validação dos campos obrigatórios
         if (!FormValidator.validateRequiredFields(nickname, password)) {
-            request.getSession().setAttribute("errorMsg", "Todos os campos são obrigatórios.");
-            request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            System.out.println("[LoginServlet] Falha: campos obrigatórios em falta.");
+            forwardWithError(request, response, "Todos os campos são obrigatórios.");
             return;
         }
 
@@ -31,12 +33,11 @@ public class LoginServlet extends HttpServlet {
         String xsdPath = getClass().getClassLoader().getResource("xsd/gameProtocol.xsd").getPath();
 
         if (!ServerResponseHandler.validate(loginXml, xsdPath)) {
-            request.getSession().setAttribute("errorMsg", "XML de login inválido (não cumpre o XSD).");
-            request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            System.out.println("[LoginServlet] Falha: XML de login inválido.");
+            forwardWithError(request, response, "XML de login inválido (não cumpre o XSD).");
             return;
         }
 
-        System.out.println("[LoginServlet] Enviar XML de login para o servidor: " + loginXml);
         GameServerClient client = new GameServerClient();
         String serverResponseXml;
         try {
@@ -44,29 +45,32 @@ public class LoginServlet extends HttpServlet {
             System.out.println("[LoginServlet] Resposta XML do servidor: " + serverResponseXml);
         } catch (Exception e) {
             System.err.println("[LoginServlet] Erro na comunicação com o servidor: " + e.getMessage());
-            request.getSession().setAttribute("errorMsg", "Falha na comunicação com o servidor de jogos.");
-            request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            forwardWithError(request, response, "Falha na comunicação com o servidor de jogos.");
             return;
         }
 
         if (!ServerResponseHandler.validate(serverResponseXml, xsdPath)) {
-            System.err.println("[LoginServlet] XML de resposta inválido (não cumpre o XSD).");
-            request.getSession().setAttribute("errorMsg", "Resposta do servidor inválida (XML não cumpre o XSD).");
-            request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            System.out.println("[LoginServlet] Falha: XML de resposta inválido.");
+            forwardWithError(request, response, "Resposta do servidor inválida (XML não cumpre o XSD).");
             return;
         }
 
         if (ServerResponseHandler.isSuccess(serverResponseXml, "login")) {
             System.out.println("[LoginServlet] Login efetuado com sucesso para utilizador: " + nickname);
+            // Extrair dados reais do utilizador do XML de resposta do servidor
+            UserProfileData profile = ServerResponseHandler.extractUserProfile(serverResponseXml, xsdPath);
+            request.getSession().setAttribute("userProfile", profile);
             request.getSession().setAttribute("nickname", nickname);
-
             response.sendRedirect(request.getContextPath() + "/pages/dashboard.jsp");
-
         } else {
             String reason = ServerResponseHandler.getErrorMessage(serverResponseXml, "login");
             System.err.println("[LoginServlet] Erro no login: " + (reason != null ? reason : "Desconhecido"));
-            request.getSession().setAttribute("errorMsg", "Erro no login: " + (reason != null ? reason : "Desconhecido"));
-            request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            forwardWithError(request, response, "Erro no login: " + (reason != null ? reason : "Desconhecido"));
         }
+    }
+
+    private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String errorMsg) throws ServletException, IOException {
+        request.getSession().setAttribute("error", errorMsg);
+        request.getServletContext().getRequestDispatcher("/pages/login.jsp").forward(request, response);
     }
 }

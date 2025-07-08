@@ -1,5 +1,7 @@
 package org.rafael.gobangjsp.common;
 
+import java.io.Serializable;
+
 public record UserProfileData(
         String username,
         int age,
@@ -8,4 +10,4 @@ public record UserProfileData(
         int losses,
         long timePlayed,
         String photoBase64
-) {}
+) implements Serializable {}

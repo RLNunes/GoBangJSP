@@ -19,7 +19,15 @@
     <% } %>
   </h1>
   <a href="game.html" class="btn btn-primary">Play</a>
-  <a href="profile.html" class="btn btn-primary">Profile</a>
+  <a href="profile.jsp"
+     class="btn btn-primary"
+     onclick="event.preventDefault(); document.getElementById('profileForm').submit();">Profile</a>
+  <form id="profileForm" action="profile.jsp" method="get" style="display:none;">
+    <input type="hidden" name="nickname" value="<%= session.getAttribute("nickname") != null ? session.getAttribute("nickname") : "" %>" />
+    <input type="hidden" name="nationality" value="<%= session.getAttribute("nationality") != null ? session.getAttribute("nationality") : "" %>" />
+    <input type="hidden" name="age" value="<%= session.getAttribute("age") != null ? session.getAttribute("age") : "" %>" />
+    <!-- Adiciona mais campos se necessário -->
+  </form>
   <a href="ranking.html" class="btn btn-primary">Hall of Fame</a>
   <a href="login.html" class="btn btn-red">Logout</a>
   <a href="../index.html" class="btn btn-green">← Back Home</a>

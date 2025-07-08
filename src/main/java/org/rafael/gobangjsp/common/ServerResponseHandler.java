@@ -12,6 +12,8 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.StringReader;
+import org.rafael.gobangjsp.common.UserProfileData;
+import java.io.ByteArrayInputStream;
 
 /**
  * Classe utilitária para validação e parsing de respostas XML do servidor de jogo.
@@ -88,6 +90,57 @@ public class ServerResponseHandler {
         return null;
     }
 
+    /**
+     * Extrai dados do utilizador do XML de resposta do servidor e cria UserProfileData.
+     * Valida o XML com o XSD antes de extrair os dados.
+     * @param xml XML de resposta
+     * @param xsdPath Caminho para o XSD de validação
+     * @return Objeto UserProfileData com os dados do utilizador, ou null em caso de erro
+     */
+    public static UserProfileData extractUserProfile(String xml, String xsdPath) {
+        try {
+            // Validar o XML antes de processar
+            if (!validate(xml, xsdPath)) {
+                System.err.println("[ServerResponseHandler] XML inválido para UserProfileData.");
+                return null;
+            }
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            Document doc = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+            Element root = doc.getDocumentElement();
+            // Supondo que o XML tem um nó <user> ou <player> com os campos
+            Element userElem = null;
+            if (root.getElementsByTagName("user").getLength() > 0) {
+                userElem = (Element) root.getElementsByTagName("user").item(0);
+            } else if (root.getElementsByTagName("player").getLength() > 0) {
+                userElem = (Element) root.getElementsByTagName("player").item(0);
+            }
+            if (userElem == null) return null;
+            String username = userElem.getAttribute("nickname");
+            String nationality = userElem.getAttribute("nationality");
+            String ageStr = userElem.getAttribute("age");
+            String winsStr = userElem.getAttribute("wins");
+            String lossesStr = userElem.getAttribute("losses");
+            String timePlayedStr = userElem.getAttribute("timePlayed");
+            String photoBase64 = userElem.getAttribute("photoBase64");
+            int age = ageStr != null && !ageStr.isEmpty() ? Integer.parseInt(ageStr) : 0;
+            int wins = winsStr != null && !winsStr.isEmpty() ? Integer.parseInt(winsStr) : 0;
+            int losses = lossesStr != null && !lossesStr.isEmpty() ? Integer.parseInt(lossesStr) : 0;
+            long timePlayed = timePlayedStr != null && !timePlayedStr.isEmpty() ? Long.parseLong(timePlayedStr) : 0L;
+            return new UserProfileData(
+                username != null ? username : "",
+                age,
+                nationality != null ? nationality : "",
+                wins,
+                losses,
+                timePlayed,
+                photoBase64 != null ? photoBase64 : ""
+            );
+        } catch (Exception e) {
+            System.err.println("[ServerResponseHandler] Erro ao extrair UserProfileData: " + e.getMessage());
+            return null;
+        }
+    }
+
     // Métodos utilitários adicionais podem ser facilmente adicionados aqui
 }
-

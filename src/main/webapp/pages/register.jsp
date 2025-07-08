@@ -15,9 +15,15 @@
   <h2 class="title is-4 has-text-weight-bold mb-5">
     Register New Player
   </h2>
-  <c:if test="${not empty errorMsg}">
-    <div style="color:red; margin-bottom:1em;">${errorMsg}</div>
-  </c:if>
+  <%-- Mensagens de erro e sucesso (sem JSTL) --%>
+  <% if (session.getAttribute("error") != null) { %>
+    <div style="color:red; margin-bottom:1em;"><%= session.getAttribute("error") %></div>
+    <% session.removeAttribute("error"); %>
+  <% } %>
+  <% if (session.getAttribute("success") != null) { %>
+    <div style="color:green; margin-bottom:1em;"><%= session.getAttribute("success") %></div>
+    <% session.removeAttribute("success"); %>
+  <% } %>
   <form action="${pageContext.request.contextPath}/register" method="post" id="registerForm">
     <div class="field mb-3">
       <label class="label has-text-left" for="nickname">Nickname</label>

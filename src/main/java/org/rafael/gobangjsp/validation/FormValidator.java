@@ -4,23 +4,14 @@ public final class FormValidator {
 
     /**
      * Valida se todos os campos obrigatórios estão preenchidos.
-     *
-     * @param nickname Nome de utilizador
-     * @param password Palavra-passe
-     * @return true se todos os campos estiverem preenchidos, false caso contrário
+     * Recebe um array de campos obrigatórios (String ou Integer convertido para String).
+     * Retorna true se todos estiverem preenchidos, false caso contrário.
      */
-    public static boolean validateRequiredFields(String nickname, String password) {
-        return validateRequiredFields(nickname, password, null, 0, null);
-    }
-
-    public static boolean validateRequiredFields(String nickname, String password, String nationality, Integer age, String photoBase64) {
-        if (nickname == null && nickname.isEmpty()) return false;
-        if (password == null && password.isEmpty()) return false;
-
-        if (nationality != null && nationality.isEmpty()) return false;
-        if (age != null && age < 0) return false;
-        if (photoBase64 != null && photoBase64.isEmpty()) return false;
-
+    public static boolean validateRequiredFields(Object... fields) {
+        for (Object field : fields) {
+            if (field == null) return false;
+            if (field instanceof String && ((String) field).trim().isEmpty()) return false;
+        }
         return true;
     }
 
