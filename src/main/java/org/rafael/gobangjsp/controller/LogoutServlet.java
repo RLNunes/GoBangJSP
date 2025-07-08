@@ -13,7 +13,7 @@ import java.io.IOException;
 @WebServlet(name = "LogoutServlet", value = "/logout")
 public class LogoutServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String username = (String) request.getSession().getAttribute("username");
         System.out.println("[LogoutServlet] Logout pedido para utilizador: " + username);
         if (username != null) {
@@ -24,6 +24,9 @@ public class LogoutServlet extends HttpServlet {
                 String xmlResponse = client.sendCommand(xmlRequest);
                 ServerResponseHandler.validate(xmlResponse, xsdPath);
             } catch (Exception e) {
+                System.err.println("[LogoutServlet] Erro ao comunicar logout ao servidor: " + e.getMessage());
+                forwardWithError(request, response, "Erro ao comunicar logout ao servidor: " + e.getMessage());
+                return;
             }
         }
         request.getSession().invalidate();
