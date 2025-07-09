@@ -10,6 +10,7 @@ import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.Base64;
 import org.rafael.gobangjsp.common.*;
+import org.rafael.gobangjsp.common.records.UserProfileData;
 import org.rafael.gobangjsp.util.GameServerClient;
 import org.rafael.gobangjsp.validation.FormValidator;
 

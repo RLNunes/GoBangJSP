@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.rafael.gobangjsp.common.ServerResponseHandler;
-import org.rafael.gobangjsp.common.UserProfileData;
+import org.rafael.gobangjsp.common.records.UserProfileData;
 import org.rafael.gobangjsp.common.XmlMessageBuilder;
 import org.rafael.gobangjsp.util.GameServerClient;
 

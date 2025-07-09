@@ -5,9 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.rafael.gobangjsp.common.XmlMessageReader;
+import org.rafael.gobangjsp.common.records.ResponseStatus;
 import org.rafael.gobangjsp.util.GameServerClient;
 import org.rafael.gobangjsp.common.ServerResponseHandler;
 import org.rafael.gobangjsp.common.XmlMessageBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 
@@ -43,7 +47,22 @@ public class FindMatchServlet extends HttpServlet {
             forwardWithError(request, response, "Resposta inválida do servidor de jogo.");
             return;
         }
+        try {
+            ResponseStatus resp = ServerResponseHandler.parseResponseStatus(xmlResponse);
+            if (resp != null && "success".equalsIgnoreCase(resp.status()) && "findMatch".equalsIgnoreCase(resp.operation())) {
+                System.out.println("[FindMatchServlet] Matchmaking iniciado com sucesso.");
 
+                request.setAttribute("matchmakingStatus", "waiting");
+                request.getRequestDispatcher("/pages/game.jsp").forward(request, response);
+            } else {
+                System.out.println("[FindMatchServlet] Erro no matchmaking: " + (resp != null ? resp.message() : "Resposta inválida."));
+                String msg = (resp != null && resp.message() != null) ? resp.message() : "Erro no matchmaking.";
+                forwardWithError(request, response, msg);
+            }
+        } catch (Exception e) {
+            System.err.println("[FindMatchServlet] Erro ao processar resposta: " + e.getMessage());
+            forwardWithError(request, response, "Erro ao processar resposta do servidor de jogos.");
+        }
     }
 
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String errorMsg) throws IOException, ServletException {

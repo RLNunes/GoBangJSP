@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="org.rafael.gobangjsp.common.UserProfileData" %>
+<%@ page import="org.rafael.gobangjsp.common.records.UserProfileData" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>

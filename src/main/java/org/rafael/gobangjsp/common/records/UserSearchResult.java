@@ -1,4 +1,4 @@
-package org.rafael.gobangjsp.common;
+package org.rafael.gobangjsp.common.records;
 
 import java.io.Serializable;
 

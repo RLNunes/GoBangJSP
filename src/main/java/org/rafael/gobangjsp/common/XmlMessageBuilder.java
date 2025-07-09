@@ -1,5 +1,7 @@
 package org.rafael.gobangjsp.common;
 
+import org.rafael.gobangjsp.common.records.GameHistory;
+
 import java.util.List;
 
 public class XmlMessageBuilder {

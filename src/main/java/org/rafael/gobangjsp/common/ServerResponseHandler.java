@@ -7,6 +7,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.rafael.gobangjsp.common.records.UserProfileData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -15,6 +16,7 @@ import java.io.StringReader;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.rafael.gobangjsp.common.records.ResponseStatus;
 
 /**
  * Classe utilitária para validação e parsing de respostas XML do servidor de jogo.
@@ -145,6 +147,25 @@ public class ServerResponseHandler {
             System.err.println("[ServerResponseHandler] Erro ao extrair ranking: " + e.getMessage());
         }
         return ranking;
+    }
+
+    /**
+     * Lê os campos principais (<status>, <operation>, <message>) de uma resposta XML <response>.
+     * @param xml XML de resposta
+     * @return ResponseStatus com os campos extraídos
+     */
+    public static ResponseStatus parseResponseStatus(String xml) {
+        try {
+            Document doc = XmlMessageReader.parseXml(xml);
+            Element root = doc.getDocumentElement();
+            String status = XmlMessageReader.getTextValue(root, "status");
+            String operation = XmlMessageReader.getTextValue(root, "operation");
+            String message = XmlMessageReader.getTextValue(root, "message");
+            return new ResponseStatus(status, operation, message);
+        } catch (Exception e) {
+            System.err.println("[ServerResponseHandler] Erro ao ler resposta: " + e.getMessage());
+            return null;
+        }
     }
 
     private static Document parseXml(String xml) {

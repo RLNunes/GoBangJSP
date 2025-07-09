@@ -12,7 +12,7 @@ import org.rafael.gobangjsp.util.GameServerClient;
 import org.rafael.gobangjsp.common.XmlMessageBuilder;
 import org.rafael.gobangjsp.common.ServerResponseHandler;
 import org.rafael.gobangjsp.database.UserDatabase;
-import org.rafael.gobangjsp.common.UserProfileData;
+import org.rafael.gobangjsp.common.records.UserProfileData;
 
 import java.io.IOException;
 
